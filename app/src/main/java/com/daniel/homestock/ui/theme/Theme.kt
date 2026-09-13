@@ -55,4 +55,5 @@ fun HomeStockTheme(
         typography = Typography,
         content = content
     )
+
 }

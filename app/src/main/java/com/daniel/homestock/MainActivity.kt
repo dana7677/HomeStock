@@ -6,36 +6,57 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
-import com.daniel.homestock.ui.theme.HomeStockTheme
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.daniel.homestock.ui.theme.HomeStockTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
 
+        setContent {
             HomeStockTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController = navController,
+                    startDestination = "home"
+                ) {
+
+                    composable("home") {
+                        HomeScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            onAddObjectClick = {
+                                navController.navigate("add_object")//Creamos la funcion onAddObject para Navegar a la siguiente ventana
+                            }
+                        )
+                    }
+                    //Dirección de la ruta "add_object" el fichero AddObjectScreen...
+                    composable("add_object") {
+                        AddObjectScreen(
+                            onBackClick = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -59,35 +80,39 @@ fun GreetingPreview() {
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier)
-{
-    Column (
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    onAddObjectClick: () -> Unit
+) {
+    Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    )
-    {
+    ) {
+
         Text(
-            text="HomeStock",
-            fontSize= 32.sp,
-            fontWeight = Bold,
+            text = "HomeStock",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         Button(
             onClick = {
-                //Lo que ocurrira
+                onAddObjectClick()
             },
             modifier = Modifier
+                .padding(16.dp)
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
         ) {
             Text("Añadir Objeto")
         }
     }
-
 }
