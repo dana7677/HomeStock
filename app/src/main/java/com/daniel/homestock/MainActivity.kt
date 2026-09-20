@@ -33,31 +33,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             HomeStockTheme {
-
-                val navController = rememberNavController()
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "home"
-                ) {
-
-                    composable("home") {
-                        HomeScreen(
-                            modifier = Modifier.fillMaxSize(),
-                            onAddObjectClick = {
-                                navController.navigate("add_object")//Creamos la funcion onAddObject para Navegar a la siguiente ventana
-                            }
-                        )
-                    }
-                    //Dirección de la ruta "add_object" el fichero AddObjectScreen...
-                    composable("add_object") {
-                        AddObjectScreen(
-                            onBackClick = {
-                                navController.popBackStack()
-                            }
-                        )
-                    }
-                }
+                AppNavigation()
             }
         }
     }
