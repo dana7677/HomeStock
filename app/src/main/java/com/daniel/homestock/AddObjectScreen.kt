@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -30,11 +32,17 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
     var cantidad by remember {mutableStateOf(value="1")}
     var errorNombre by remember { mutableStateOf(value=false) }
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Añadir objeto")
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         TextField(
             value = nombre,
@@ -44,15 +52,19 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                             },
             label = {
                 Text("Nombre")
-            }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
         )
         if (errorNombre)
         {
             Text("El nombre es obligatorio")
         }
+
         Spacer (
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(16.dp)
         )
+
         TextField(
             value = cantidad,
             onValueChange = {
@@ -65,37 +77,55 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
             //Introducir números, saldra un teclado numérico
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
-            )
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        Spacer (
+            modifier = Modifier.height(16.dp)
         )
 
         Text(
             text = "Objeto: $nombre \n Cantidad: $cantidad"
         )
 
-        Button(
-            onClick = {
-                if(nombre.isBlank())
-                {
-                    errorNombre = true
-                }
-                else
-                {
-                    //Posteriormente agregarlo a la base de datos
-                    println("Objeto guardado: $nombre, cantidad $cantidad")
-                }
-                onBackClick()
-            }
-        ){
-            Text("Guardar objeto")
-        }
-        Button(
-            onClick = {
-                onBackClick()
-            }
+        Spacer (
+            modifier = Modifier.height(16.dp)
         )
-        {
-         Text("Volver")
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Button(
+                onClick = {
+                    if(nombre.isBlank())
+                    {
+                        errorNombre = true
+                    }
+                    else
+                    {
+                        //Posteriormente agregarlo a la base de datos
+                        println("Objeto guardado: $nombre, cantidad $cantidad")
+                    }
+                    onBackClick()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ){
+                Text("Guardar objeto")
+            }
+            Button(
+                onClick = {
+                    onBackClick()
+                }
+            )
+            {
+                Text("Volver")
+            }
+
         }
+
+
 
 
     }

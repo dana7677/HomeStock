@@ -1,32 +1,32 @@
 package com.daniel.homestock
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun AppNavigation(){
+fun AppNavigation() {
 
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = Routes.HOME
+        startDestination = "home"
     ) {
 
-        composable(Routes.HOME) {
+        composable("home") {
             HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 onAddObjectClick = {
-                    navController.navigate(Routes.ADD_OBJECT)//Creamos la funcion onAddObject para Navegar a la siguiente ventana
+                    navController.navigate("add_object")
                 }
             )
         }
-        //Dirección de la ruta "add_object" el fichero AddObjectScreen...
-        composable(Routes.ADD_OBJECT) {
+
+        composable("add_object") {
             AddObjectScreen(
                 onBackClick = {
                     navController.popBackStack()
