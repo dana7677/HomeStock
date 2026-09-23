@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +38,7 @@ import androidx.compose.runtime.mutableStateListOf
 @Composable
 fun AddObjectScreen( onBackClick: () -> Unit) {
 
+    var siguienteId by remember {mutableStateOf(1)}
     var nombre by remember {mutableStateOf("")}
     var cantidad by remember {mutableStateOf(value="1")}
     var errorNombre by remember { mutableStateOf(value=false) }
@@ -150,11 +152,13 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                         {
                             val cantidadNumero = cantidad.toInt()
                             val objeto = ObjectItem(
+                                id = siguienteId,
                                 nombre = nombre,
                                 cantidad = cantidadNumero,
                                 estado = ObjectStatus.AVAILABLE
                             )
                             objetos.add(objeto)
+                            siguienteId++
                             //println(objeto)
                         }
                     },
@@ -183,7 +187,11 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
         ) {
             items(objetos)
             { objeto ->
-                ObjectItemRow(objeto = objeto)
+                ObjectItemRow(
+                    objeto = objeto,
+                    onDeleteClick ={
+                        objetos.remove(objeto)
+                    })
 
 
             }
@@ -191,24 +199,47 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
 
     }
 }
+
 @Composable
-fun ObjectItemRow(objeto: ObjectItem)
-{
-    Row(
+fun ObjectItemRow(objeto: ObjectItem,
+                  onDeleteClick:() -> Unit) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    )
-    {
-        Text(
-            text = objeto.nombre
-        )
-        Text(
-            text = "Cantidad: ${objeto.cantidad}"
-        )
-        Text(
-            text = objeto.estado.name
-        )
+            .padding(vertical = 6.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = objeto.nombre,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "Cantidad: ${objeto.cantidad}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Text(
+                text = objeto.estado.name,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Button(
+                onClick = {
+                    onDeleteClick()
+                }
+            ){
+                Text("Eliminar")
+            }
+        }
     }
 }
