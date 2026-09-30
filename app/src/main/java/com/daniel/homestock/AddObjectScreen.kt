@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +36,10 @@ import com.daniel.homestock.model.ObjectItem
 import com.daniel.homestock.model.ObjectStatus
 import java.nio.file.WatchEvent
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.text.style.TextAlign
+import com.daniel.homestock.ui.theme.GreenHomeStock
+import com.daniel.homestock.ui.theme.OrangeHomeStock
+import com.daniel.homestock.ui.theme.RedHomeStock
 
 @Composable
 fun AddObjectScreen( onBackClick: () -> Unit) {
@@ -66,11 +72,10 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+
+          ) {
         Column(
-            modifier = Modifier.weight(1f)
+
         )
         {
 
@@ -143,9 +148,6 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                 modifier = Modifier.height(24.dp)
             )
 
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
                 Button(
                     onClick = {
                         if(validarFormulario())
@@ -159,6 +161,10 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                             )
                             objetos.add(objeto)
                             siguienteId++
+
+                            //Limpiar Objeto
+                            nombre = ""
+                            cantidad =""
                             //println(objeto)
                         }
                     },
@@ -180,8 +186,9 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                 }
 
             }
-
-        }
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
         LazyColumn(
             modifier = Modifier.weight(1f)
         ) {
@@ -206,7 +213,7 @@ fun ObjectItemRow(objeto: ObjectItem,
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
+            .padding(bottom = 6.dp)
     ) {
         Row(
             modifier = Modifier
@@ -227,11 +234,31 @@ fun ObjectItemRow(objeto: ObjectItem,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+            val colorEstado = when (objeto.estado) {
+                ObjectStatus.AVAILABLE -> GreenHomeStock
+                ObjectStatus.LOANED -> OrangeHomeStock
+                ObjectStatus.BROKEN -> RedHomeStock
+            }
 
-            Text(
-                text = objeto.estado.name,
-                style = MaterialTheme.typography.bodyMedium
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+                color = colorEstado
+            ) {
+                Text(
+                    text = estadoTexto(objeto.estado),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(
+                        horizontal = 8.dp,
+                        vertical = 4.dp
+                    )
+                )
+            }
+            Spacer(
+                modifier = Modifier.width(8.dp)
             )
+
 
             Button(
                 onClick = {
@@ -241,5 +268,15 @@ fun ObjectItemRow(objeto: ObjectItem,
                 Text("Eliminar")
             }
         }
+    }
+}
+
+fun estadoTexto(estado: ObjectStatus): String
+{
+    return when (estado)
+    {
+        ObjectStatus.AVAILABLE -> "Disponible"
+        ObjectStatus.LOANED -> "Prestado"
+        ObjectStatus.BROKEN -> "Roto"
     }
 }
