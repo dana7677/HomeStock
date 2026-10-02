@@ -40,7 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.daniel.homestock.ui.theme.GreenHomeStock
 import com.daniel.homestock.ui.theme.OrangeHomeStock
 import com.daniel.homestock.ui.theme.RedHomeStock
-
+import androidx.compose.foundation.clickable
 @Composable
 fun AddObjectScreen( onBackClick: () -> Unit) {
 
@@ -136,13 +136,13 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
 
             }
 
-            Spacer (
-                modifier = Modifier.height(16.dp)
-            )
+            /*
 
             Text(
                 text = "Objeto: $nombre \n Cantidad: $cantidad"
             )
+            */
+
 
             Spacer (
                 modifier = Modifier.height(24.dp)
@@ -164,7 +164,7 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
 
                             //Limpiar Objeto
                             nombre = ""
-                            cantidad =""
+                            cantidad ="1"
                             //println(objeto)
                         }
                     },
@@ -187,7 +187,7 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
 
             }
         Spacer(
-            modifier = Modifier.height(8.dp)
+            modifier = Modifier.height(30.dp)
         )
         LazyColumn(
             modifier = Modifier.weight(1f)
@@ -198,8 +198,15 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                     objeto = objeto,
                     onDeleteClick ={
                         objetos.remove(objeto)
-                    })
+                    },
+                    onStatusChange = { nuevoEstado ->
+                        val indice = objetos.indexOf(objeto)
 
+                        objetos[indice] = objeto.copy(
+                            estado = nuevoEstado
+                        )
+                    }
+                )
 
             }
         }
@@ -209,7 +216,8 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
 
 @Composable
 fun ObjectItemRow(objeto: ObjectItem,
-                  onDeleteClick:() -> Unit) {
+                  onDeleteClick:() -> Unit,
+                  onStatusChange:(ObjectStatus)-> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -241,7 +249,17 @@ fun ObjectItemRow(objeto: ObjectItem,
             }
 
             Surface(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
+                    .clickable{
+                        val nuevoEstado = when (objeto.estado)
+                        {
+                            ObjectStatus.AVAILABLE -> ObjectStatus.LOANED
+                            ObjectStatus.LOANED -> ObjectStatus.BROKEN
+                            ObjectStatus.BROKEN -> ObjectStatus.AVAILABLE
+                        }
+                            onStatusChange(nuevoEstado)
+
+                    },
                 shape = MaterialTheme.shapes.small,
                 color = colorEstado
             ) {
