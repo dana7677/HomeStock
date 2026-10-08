@@ -2,7 +2,6 @@ package com.daniel.homestock
 
 import android.graphics.Color
 import android.widget.Space
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +39,14 @@ import com.daniel.homestock.ui.theme.GreenHomeStock
 import com.daniel.homestock.ui.theme.OrangeHomeStock
 import com.daniel.homestock.ui.theme.RedHomeStock
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ButtonColors
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.unit.sp
+
 @Composable
 fun AddObjectScreen( onBackClick: () -> Unit) {
 
@@ -50,6 +56,7 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
     var errorNombre by remember { mutableStateOf(value=false) }
     var errorCantidad by remember {mutableStateOf(value=false)}
     val objetos = remember { mutableStateListOf<ObjectItem>() }
+    var objetoEditandoId by remember { mutableStateOf<Int?>(null) }
 
     fun validarFormulario(): Boolean {
         errorNombre = false
@@ -152,25 +159,53 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                     onClick = {
                         if(validarFormulario())
                         {
-                            val cantidadNumero = cantidad.toInt()
-                            val objeto = ObjectItem(
-                                id = siguienteId,
-                                nombre = nombre,
-                                cantidad = cantidadNumero,
-                                estado = ObjectStatus.AVAILABLE
-                            )
-                            objetos.add(objeto)
-                            siguienteId++
+                            if (objetoEditandoId != null) {
+                                // Estamos editando un objeto existente.
+                                // Debemos localizarlo y sustituirlo por una copia
+                                // con el nuevo nombre y la nueva cantidad.
+                                val objeto = buscarObjeto(objetoEditandoId!!, objetos)
 
-                            //Limpiar Objeto
-                            nombre = ""
-                            cantidad ="1"
-                            //println(objeto)
+                                if (objeto != null) {
+                                    val indice = objetos.indexOf(objeto)
+                                    objetos[indice] = objeto.copy(
+                                        nombre = nombre,
+                                        cantidad = cantidad.toInt()
+                                    )
+                                }
+                                //Volvemos a limpiar
+                                objetoEditandoId = null
+                                nombre = ""
+                                cantidad = "1"
+
+                            } else {
+                                // Estamos creando un objeto nuevo.
+                                // Aquí irá tu código actual de creación.
+                                val cantidadNumero = cantidad.toInt()
+                                val objeto = ObjectItem(
+                                    id = siguienteId,
+                                    nombre = nombre,
+                                    cantidad = cantidadNumero,
+                                    estado = ObjectStatus.AVAILABLE
+                                )
+                                objetos.add(objeto)
+                                siguienteId++
+
+                                //Limpiar Objeto
+                                nombre = ""
+                                cantidad ="1"
+                                //println(objeto)
+                            }
+
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ){
-                    Text("Guardar objeto")
+                    Text(
+                    if (objetoEditandoId == null) {
+                        "Guardar objeto"
+                    } else {
+                        "Guardar cambios"
+                    })
                 }
                 Spacer(
                     modifier = Modifier.height(8.dp)
@@ -196,6 +231,24 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
             { objeto ->
                 ObjectItemRow(
                     objeto = objeto,
+                    objetoEditandoId= objetoEditandoId,
+                    onEditClick = {
+
+                        if(objetoEditandoId==objeto.id)
+                        {
+                            // Dejamos de editar
+                            objetoEditandoId = null
+                            nombre = ""
+                            cantidad = "1"
+                        }
+                        else
+                        {
+                            nombre = objeto.nombre
+                            cantidad = objeto.cantidad.toString()
+                            objetoEditandoId = objeto.id
+                        }
+
+                    },
                     onDeleteClick ={
                         objetos.remove(objeto)
                     },
@@ -217,6 +270,8 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
 @Composable
 fun ObjectItemRow(objeto: ObjectItem,
                   onDeleteClick:() -> Unit,
+                  objetoEditandoId: Int?,
+                  onEditClick: () -> Unit,
                   onStatusChange:(ObjectStatus)-> Unit) {
     Card(
         modifier = Modifier
@@ -226,19 +281,21 @@ fun ObjectItemRow(objeto: ObjectItem,
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(0.5f)
             ) {
                 Text(
                     text = objeto.nombre,
+                    fontSize = 16.sp,
                     style = MaterialTheme.typography.titleMedium
                 )
 
                 Text(
                     text = "Cantidad: ${objeto.cantidad}",
+                    fontSize = 14.sp,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -249,7 +306,7 @@ fun ObjectItemRow(objeto: ObjectItem,
             }
 
             Surface(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(0.5f)
                     .clickable{
                         val nuevoEstado = when (objeto.estado)
                         {
@@ -260,31 +317,52 @@ fun ObjectItemRow(objeto: ObjectItem,
                             onStatusChange(nuevoEstado)
 
                     },
-                shape = MaterialTheme.shapes.small,
+                shape = MaterialTheme.shapes.medium,
                 color = colorEstado
             ) {
                 Text(
                     text = estadoTexto(objeto.estado),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
                     modifier = Modifier.padding(
-                        horizontal = 8.dp,
-                        vertical = 4.dp
+                        horizontal = 13.dp,
+                        vertical = 6.dp
                     )
                 )
             }
             Spacer(
-                modifier = Modifier.width(8.dp)
+                modifier = Modifier.width(6.dp)
             )
+            Column( modifier = Modifier.weight(0.5f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally)
+            {
+
+                Button(
 
 
-            Button(
-                onClick = {
-                    onDeleteClick()
+                    onClick = {
+                        onEditClick()
+                    }
+                ) {
+                    Text(
+                        if (objetoEditandoId == objeto.id) {
+                            "Dejar de editar"
+                        } else {
+                            "Editar"
+                        }
+                    )
                 }
-            ){
-                Text("Eliminar")
+                Button(
+                    onClick = {
+                        onDeleteClick()
+                    }
+                ){
+                    Text("Eliminar")
+                }
             }
+
         }
     }
 }
@@ -296,5 +374,13 @@ fun estadoTexto(estado: ObjectStatus): String
         ObjectStatus.AVAILABLE -> "Disponible"
         ObjectStatus.LOANED -> "Prestado"
         ObjectStatus.BROKEN -> "Roto"
+    }
+}
+
+//mutableStateListOf<ObjectItem>()
+fun buscarObjeto(id: Int, objetos: List<ObjectItem>):ObjectItem?
+{
+    return objetos.find { objeto ->
+        objeto.id == id
     }
 }

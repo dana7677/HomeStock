@@ -6,4 +6,4 @@ data class ObjectItem(
     val cantidad: Int,
     val estado: ObjectStatus,
 
-)
+    )
