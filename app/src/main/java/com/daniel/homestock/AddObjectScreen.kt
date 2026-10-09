@@ -46,16 +46,18 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.daniel.homestock.viewmodel.ObjectViewModel
 
 @Composable
-fun AddObjectScreen( onBackClick: () -> Unit) {
+fun AddObjectScreen( onBackClick: () -> Unit,viewModel: ObjectViewModel = viewModel()) {
 
-    var siguienteId by remember {mutableStateOf(1)}
+
     var nombre by remember {mutableStateOf("")}
     var cantidad by remember {mutableStateOf(value="1")}
     var errorNombre by remember { mutableStateOf(value=false) }
     var errorCantidad by remember {mutableStateOf(value=false)}
-    val objetos = remember { mutableStateListOf<ObjectItem>() }
+    val objetos = viewModel.objetos
     var objetoEditandoId by remember { mutableStateOf<Int?>(null) }
 
     fun validarFormulario(): Boolean {
@@ -87,7 +89,12 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
         {
 
 
-            Text("Añadir objeto")
+            Text(
+                if (objetoEditandoId == null) {
+                "Añadir objeto"
+            } else {
+                "Editar objeto"
+            })
 
             Spacer(
                 modifier = Modifier.height(16.dp)
@@ -163,16 +170,12 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                                 // Estamos editando un objeto existente.
                                 // Debemos localizarlo y sustituirlo por una copia
                                 // con el nuevo nombre y la nueva cantidad.
-                                val objeto = buscarObjeto(objetoEditandoId!!, objetos)
+                                viewModel.editarObjeto(
+                                    id = objetoEditandoId!!,
+                                    nombre = nombre,
+                                    cantidad = cantidad.toInt()
+                                )
 
-                                if (objeto != null) {
-                                    val indice = objetos.indexOf(objeto)
-                                    objetos[indice] = objeto.copy(
-                                        nombre = nombre,
-                                        cantidad = cantidad.toInt()
-                                    )
-                                }
-                                //Volvemos a limpiar
                                 objetoEditandoId = null
                                 nombre = ""
                                 cantidad = "1"
@@ -181,19 +184,16 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
                                 // Estamos creando un objeto nuevo.
                                 // Aquí irá tu código actual de creación.
                                 val cantidadNumero = cantidad.toInt()
-                                val objeto = ObjectItem(
-                                    id = siguienteId,
+
+                                viewModel.añadirObjeto(
                                     nombre = nombre,
-                                    cantidad = cantidadNumero,
-                                    estado = ObjectStatus.AVAILABLE
+                                    cantidad = cantidadNumero
                                 )
-                                objetos.add(objeto)
-                                siguienteId++
 
                                 //Limpiar Objeto
                                 nombre = ""
-                                cantidad ="1"
-                                //println(objeto)
+                                cantidad = "1"
+
                             }
 
                         }
@@ -250,13 +250,18 @@ fun AddObjectScreen( onBackClick: () -> Unit) {
 
                     },
                     onDeleteClick ={
-                        objetos.remove(objeto)
+                        viewModel.eliminarObjeto(objeto.id)
+
+                        if (objetoEditandoId == objeto.id) {
+                            objetoEditandoId = null
+                            nombre = ""
+                            cantidad = "1"
+                        }
                     },
                     onStatusChange = { nuevoEstado ->
-                        val indice = objetos.indexOf(objeto)
-
-                        objetos[indice] = objeto.copy(
-                            estado = nuevoEstado
+                        viewModel.cambiarEstado(
+                            id = objeto.id,
+                            nuevoEstado = nuevoEstado
                         )
                     }
                 )
