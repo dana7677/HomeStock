@@ -24,4 +24,7 @@ interface ObjectDao {
 
     @Query("UPDATE objetos SET estado = :nuevoEstado WHERE id = :id")
     suspend fun cambiarEstado(id: Int, nuevoEstado: String)
+
+    @Query("UPDATE objetos SET nombre = :nombre, cantidad = :cantidad WHERE id = :id")
+    suspend fun actualizarDatos(id: Int, nombre: String, cantidad: Int)
 }
