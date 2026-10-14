@@ -41,6 +41,7 @@ import com.daniel.homestock.ui.theme.RedHomeStock
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
@@ -345,6 +346,9 @@ fun ObjectItemRow(objeto: ObjectItem,
             {
 
                 Button(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(55.dp),
 
 
                     onClick = {
@@ -352,6 +356,8 @@ fun ObjectItemRow(objeto: ObjectItem,
                     }
                 ) {
                     Text(
+                        textAlign = TextAlign.Center,
+                        text =
                         if (objetoEditandoId == objeto.id) {
                             "Dejar de editar"
                         } else {
@@ -359,7 +365,13 @@ fun ObjectItemRow(objeto: ObjectItem,
                         }
                     )
                 }
+                Spacer(
+                    modifier = Modifier.height(3.dp)
+                )
                 Button(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(55.dp),
                     onClick = {
                         onDeleteClick()
                     }
