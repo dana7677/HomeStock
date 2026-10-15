@@ -49,6 +49,7 @@ import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.daniel.homestock.viewmodel.ObjectViewModel
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun AddObjectScreen( onBackClick: () -> Unit,viewModel: ObjectViewModel = viewModel()) {
@@ -58,7 +59,7 @@ fun AddObjectScreen( onBackClick: () -> Unit,viewModel: ObjectViewModel = viewMo
     var cantidad by remember {mutableStateOf(value="1")}
     var errorNombre by remember { mutableStateOf(value=false) }
     var errorCantidad by remember {mutableStateOf(value=false)}
-    val objetos = viewModel.objetos
+    val objetos by viewModel.objetos.collectAsState(initial = emptyList())
     var objetoEditandoId by remember { mutableStateOf<Int?>(null) }
 
     fun validarFormulario(): Boolean {
@@ -347,7 +348,7 @@ fun ObjectItemRow(objeto: ObjectItem,
 
                 Button(
                     modifier = Modifier
-                        .width(100.dp)
+                        .width(105.dp)
                         .height(55.dp),
 
 
@@ -370,7 +371,7 @@ fun ObjectItemRow(objeto: ObjectItem,
                 )
                 Button(
                     modifier = Modifier
-                        .width(100.dp)
+                        .width(105.dp)
                         .height(55.dp),
                     onClick = {
                         onDeleteClick()

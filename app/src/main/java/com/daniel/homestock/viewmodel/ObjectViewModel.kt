@@ -1,46 +1,57 @@
 package com.daniel.homestock.viewmodel
 
+import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.daniel.homestock.data.HomeStockDatabase
 import com.daniel.homestock.model.ObjectItem
 import com.daniel.homestock.model.ObjectStatus
-
-
-class ObjectViewModel : ViewModel()
+import kotlinx.coroutines.flow.map
+import com.daniel.homestock.data.ObjectEntity
+import kotlinx.coroutines.launch
+class ObjectViewModel(application: Application): AndroidViewModel(application)
 {
 
-    private val _objetos = mutableStateListOf<ObjectItem>()
+    private val database = HomeStockDatabase.obtenerBaseDeDatos(application)
+    private val objectDao = database.objectDao()
 
-    val objetos: List<ObjectItem>
-        get() = _objetos
 
-    private var siguienteId = 1
+    val objetos = objectDao.obtenerTodos().map { listaEntidades ->
+
+        listaEntidades.map { entidad ->
+
+            ObjectItem(
+                id = entidad.id,
+                nombre = entidad.nombre,
+                cantidad = entidad.cantidad,
+                estado = ObjectStatus.valueOf(entidad.estado)
+            )
+        }
+    }
 
     //1.-Funcionalidad AñadirObjeto
     fun añadirObjeto(nombre: String, cantidad: Int) {
 
-        val objeto = ObjectItem(
-            id = siguienteId,
-            nombre = nombre,
-            cantidad = cantidad,
-            estado = ObjectStatus.AVAILABLE
-        )
+        viewModelScope.launch {
 
-        _objetos.add(objeto)
+            val objeto = ObjectEntity(
+                nombre = nombre,
+                cantidad = cantidad,
+                estado = ObjectStatus.AVAILABLE.name
+            )
 
-        siguienteId++
+            objectDao.insertar(objeto)
+        }
     }
     //2.-Funcionalidad Editar Objetos
     fun editarObjeto(id: Int, nombre: String, cantidad: Int) {
 
-        val indice = _objetos.indexOfFirst { objeto ->
-            objeto.id == id
-        }
+        viewModelScope.launch {
 
-        if (indice != -1) {
-            val objeto = _objetos[indice]
-
-            _objetos[indice] = objeto.copy(
+            objectDao.actualizarDatos(
+                id = id,
                 nombre = nombre,
                 cantidad = cantidad
             )
@@ -48,24 +59,22 @@ class ObjectViewModel : ViewModel()
     }
 
     //3.-Funcionalidad EliminarObjeto
+// 3.- Funcionalidad EliminarObjeto
     fun eliminarObjeto(id: Int) {
-        _objetos.removeAll { objeto ->
-            objeto.id == id
+
+        viewModelScope.launch {
+            objectDao.eliminarPorId(id)
         }
     }
 
     //4.-Funcionalidad CambiarDeEstado
     fun cambiarEstado(id: Int, nuevoEstado: ObjectStatus) {
 
-        val indice = _objetos.indexOfFirst { objeto ->
-            objeto.id == id
-        }
+        viewModelScope.launch {
 
-        if (indice != -1) {
-            val objeto = _objetos[indice]
-
-            _objetos[indice] = objeto.copy(
-                estado = nuevoEstado
+            objectDao.cambiarEstado(
+                id = id,
+                nuevoEstado = nuevoEstado.name
             )
         }
     }
