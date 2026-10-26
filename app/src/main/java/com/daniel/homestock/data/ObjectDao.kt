@@ -13,6 +13,9 @@ interface ObjectDao {
     @Query("SELECT * FROM objetos ORDER BY id ASC")
     fun obtenerTodos(): Flow<List<ObjectEntity>>
 
+    @Query("SELECT * FROM objetos WHERE ubicacionId = :ubicacionId ORDER BY id ASC")
+    fun obtenerPorUbicacion(ubicacionId: Int): Flow<List<ObjectEntity>>
+
     @Insert
     suspend fun insertar(objeto: ObjectEntity): Long
 
@@ -27,4 +30,7 @@ interface ObjectDao {
 
     @Query("UPDATE objetos SET nombre = :nombre, cantidad = :cantidad WHERE id = :id")
     suspend fun actualizarDatos(id: Int, nombre: String, cantidad: Int)
+
+    @Query("UPDATE objetos SET ubicacionId = :ubicacionId WHERE id = :objetoId")
+    suspend fun asignarUbicacion(objetoId: Int, ubicacionId: Int?)
 }

@@ -78,4 +78,11 @@ class ObjectViewModel(application: Application): AndroidViewModel(application)
             )
         }
     }
+
+    //5.-Asignamos Ubicacion al objeto
+    fun asignarUbicacion(objetoId: Int, ubicacionId: Int?) {
+        viewModelScope.launch {
+            objectDao.asignarUbicacion(objetoId, ubicacionId)
+        }
+    }
 }

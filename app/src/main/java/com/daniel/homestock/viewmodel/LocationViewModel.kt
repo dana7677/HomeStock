@@ -87,5 +87,42 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun eliminarUbicacion(
+        ubicacionId: Int,
+        onResultado: (Boolean) -> Unit = {}
+    ) {
+        viewModelScope.launch {
 
+            // Comprobamos que la ubicación existe.
+            val ubicacion = locationDao.obtenerPorId(ubicacionId)
+
+            if (ubicacion == null) {
+                onResultado(false)
+                return@launch
+            }
+
+            // Comprobamos si contiene otras ubicaciones.
+            val tieneHijas = locationDao.tieneHijas(ubicacionId)
+
+            // Comprobamos si contiene objetos.
+            val tieneObjetos = locationDao.tieneObjetos(ubicacionId)
+
+            // Si contiene algo, impedimos eliminarla.
+            if (tieneHijas || tieneObjetos) {
+                onResultado(false)
+                return@launch
+            }
+
+            // Si está vacía, la eliminamos.
+            locationDao.eliminarPorId(ubicacionId)
+
+            onResultado(true)
+        }
+    }
+
+    fun obtenerUbicacionesHijas(
+        padreId: Int
+    ): Flow<List<LocationEntity>> {
+        return locationDao.obtenerHijas(padreId)
+    }
 }

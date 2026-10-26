@@ -14,10 +14,10 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = Routes.LOCATIONS
     ) {
 
-        composable("home") {
+        composable(Routes.HOME) {
             HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 onAddObjectClick = {
@@ -26,10 +26,19 @@ fun AppNavigation() {
             )
         }
 
-        composable("add_object") {
+        composable(Routes.ADD_OBJECT) {
             AddObjectScreen(
                 onBackClick = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Routes.LOCATIONS) {
+            LocationScreen(
+                onUbicacionClick = { ubicacion ->
+                    // Más adelante navegaremos al interior
+                    // de la ubicación seleccionada.
                 }
             )
         }
